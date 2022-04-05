@@ -8,7 +8,7 @@ library(survival)
 library(survminer)
 
 ## load the processed TCGA data 
-df1 <- readRDS(tcga_gbm_for_male.rds)
+df2 <- readRDS(tcga_gbm_for_male.rds)
 
 ## remove the row which is "0"
 tmp <- df2
@@ -32,7 +32,7 @@ ph_hypo_multi ## so remove CXCL10,CCL2.
 ph_hypo_table <- ph_hypo_multi$table[-nrow(ph_hypo_multi$table),]
 
 ## Use the three genes for cox regression.
-res.cox_male <- as.formula(paste0('Surv(times, patient.vital_status)~',paste0(c("ECT2","NMB","GPR65") , sep = ' ', collapse = '+')))
+res.cox_male <- as.formula(paste0('Surv(times, patient.vital_status)~',paste0(c("CXCR4","TNFSF13B","FCGRA2") , sep = ' ', collapse = '+')))
 res.cox_male <- coxph(res.cox_male, data = tmp)
 summary(res.cox_male)
 
@@ -122,7 +122,7 @@ head(for_multi_ROC)
 
 ## visualization of the ROC curves.
 AUC_max <- for_multi_ROC$AUC %>% max()
-AUC_max_time <- for_multi_ROC$Time_point[for_multi_ROC$AUC == AUC_max] %>%¡¡unique()
+AUC_max_time <- for_multi_ROC$Time_point[for_multi_ROC$AUC == AUC_max] %>%??unique()
 
 pROC<-ggplot(for_multi_ROC, aes(x = False_positive, y = True_positive, label = Cut_values, color = factor(Time_point))) + 
   geom_roc(labels = F, stat = 'identity', n.cuts = 0) + 
@@ -134,9 +134,9 @@ pROC<-ggplot(for_multi_ROC, aes(x = False_positive, y = True_positive, label = C
            label = paste("AUC max = ", round(AUC_max, 2), '\n', 'AUC max time = ', AUC_max_time, ' days', sep = ''))
 pROC
 
-## Then we intercept the turning point of the ROC curve, which is the point with the largest difference between true positives and false positives, 
-## That can be the cut-off value of the risk score, subjects with the value higher than cut-off is a high-risk group, lower than this value is a low-risk group, 
-## and we incorporated the information into risk_score_table.
+## Then we intercept the turning point of the ROC curve, which is the point with the largest difference between true positives and false positives. 
+## That can be the cut-off value of the risk score, subjects with the value higher than cut-off is belong to high-risk group, lower than this value is belong to low-risk group, 
+## and we incorporated the information into a risk_score_table.
 AUC_max <- max(for_multi_ROC$AUC)
 ## we select the last time point for the identical time value.
 AUC_max_time <- for_multi_ROC$Time_point[which(for_multi_ROC$AUC == AUC_max)]
